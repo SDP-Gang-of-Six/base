@@ -137,6 +137,8 @@ jobs:
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
 
     - name: Run command via SSH
       run: sshpass -p "${{ env.ROOT_PASSWORD }}" ssh -o StrictHostKeyChecking=no root@wxl475.cn "sh /root/pet-hospital/${{ env.TARGET_MODULE }}.sh"
