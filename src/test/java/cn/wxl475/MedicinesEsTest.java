@@ -1,8 +1,8 @@
 package cn.wxl475;
 
-import cn.wxl475.pojo.base.Department;
-import cn.wxl475.pojo.base.Staff;
-import cn.wxl475.repo.DepartmentEsRepo;
+import cn.wxl475.pojo.base.Medicine;
+import cn.wxl475.repo.MedicineEsRepo;
+import cn.wxl475.repo.StaffEsRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,17 +14,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 @Slf4j
 @SpringBootTest(args = "--spring.profiles.active=dev")
 @RunWith(SpringRunner.class)
-public class DepartmentsEsTest {
-
+public class MedicinesEsTest {
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
-    private DepartmentEsRepo departmentEsRepo;
+    private MedicineEsRepo medicineEsRepo;
 
     @Test
-    public void creatDepartmentsIndex(){
-        Class<Department> aClass = Department.class;
+    public void creatMedicinesIndex(){
+        Class<Medicine> aClass = Medicine.class;
         boolean created = elasticsearchRestTemplate.indexOps(aClass).createWithMapping();
         if(created){
             log.info("创建索引：{}",aClass.getName()+",成功");
@@ -34,8 +33,8 @@ public class DepartmentsEsTest {
     }
 
     @Test
-    public void deleteDepartmentsIndex(){
-        Class<Department> aClass = Department.class;
+    public void deleteMedicinesIndex(){
+        Class<Medicine> aClass = Medicine.class;
         boolean deleted = elasticsearchRestTemplate.indexOps(aClass).delete();
         if(deleted){
             log.info("删除索引：{}",aClass.getName()+",成功");
@@ -43,10 +42,9 @@ public class DepartmentsEsTest {
             log.info("删除索引：{}",aClass.getName()+",失败");
         }
     }
-
     @Test
-    public void rebuildDepartmentsIndex(){
-        Class<Department> aClass = Department.class;
+    public void rebuildMedicinesIndex(){
+        Class<Medicine> aClass = Medicine.class;
         boolean deleted = elasticsearchRestTemplate.indexOps(aClass).delete();
         boolean created = elasticsearchRestTemplate.indexOps(aClass).createWithMapping();
         if(deleted&&created){
@@ -57,12 +55,12 @@ public class DepartmentsEsTest {
     }
 
     @Test
-    public void findAllDepartments(){
-        departmentEsRepo.findAll().forEach(department -> { log.info(String.valueOf(department));});
+    public void findAllMedicines(){
+        medicineEsRepo.findAll().forEach(medicine -> { log.info(String.valueOf(medicine));});
     }
 
     @Test
-    public void deleteAllDepartments(){
-        departmentEsRepo.deleteAll();
+    public void deleteAllMedicines(){
+        medicineEsRepo.deleteAll();
     }
 }
