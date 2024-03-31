@@ -2,7 +2,6 @@ package cn.wxl475;
 
 import cn.wxl475.pojo.base.Medicine;
 import cn.wxl475.repo.MedicineEsRepo;
-import cn.wxl475.repo.StaffEsRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,7 +1,6 @@
 package cn.wxl475;
 
 import cn.wxl475.pojo.base.Department;
-import cn.wxl475.pojo.base.Staff;
 import cn.wxl475.repo.DepartmentEsRepo;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
