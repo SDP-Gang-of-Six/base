@@ -83,6 +83,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         }
         departmentMapper.insert(department);
         departmentEsRepo.save(department);
+        department.setDeleted(false);
         return department;
     }
 
