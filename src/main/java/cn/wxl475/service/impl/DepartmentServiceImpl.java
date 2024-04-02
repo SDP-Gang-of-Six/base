@@ -2,6 +2,7 @@ package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.DepartmentMapper;
 import cn.wxl475.pojo.base.department.Department;
+import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -11,16 +12,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 
+import static cn.wxl475.redis.RedisConstants.CACHE_DEPARTMENT_DETAIL_KEY;
+
 @Service
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
 
     private final DepartmentMapper departmentMapper;
     private final DepartmentEsRepo departmentEsRepo;
+    private final CacheClient cacheClient;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo) {
+    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, CacheClient cacheClient) {
         this.departmentMapper = departmentMapper;
         this.departmentEsRepo = departmentEsRepo;
+        this.cacheClient = cacheClient;
     }
 
     @Override
@@ -92,7 +97,8 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     public void delete(ArrayList<Long> departmentIds) throws Exception {
         try {
             departmentMapper.deleteBatchIds(departmentIds);
-            departmentIds.forEach(departmentEsRepo::deleteById);
+            departmentEsRepo.deleteAllById(departmentIds);
+            departmentIds.forEach(departmentId-> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departmentId));
         }catch (Exception e){
             throw new Exception(e);
         }
