@@ -3,12 +3,14 @@ package cn.wxl475.controller;
 import cn.wxl475.pojo.Result;
 import cn.wxl475.pojo.base.department.Department;
 import cn.wxl475.service.DepartmentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
+@Slf4j
 @RestController
 @RequestMapping("/base/department")
 public class DepartmentController {
@@ -48,7 +50,16 @@ public class DepartmentController {
     }
 
     @PostMapping("/delete")
-    public Result delete(@RequestBody Department department){
-        return Result.success(departmentService.delete(department));
+    public Result delete(@RequestBody ArrayList<Long> departmentIds){
+        if(departmentIds.isEmpty()){
+            return Result.error("无科室需要删除");
+        }
+        try {
+            departmentService.delete(departmentIds);
+        } catch (Exception e) {
+            log.info(Arrays.toString(e.getStackTrace()));
+            return Result.error(e.getMessage());
+        }
+        return Result.success(true);
     }
 }

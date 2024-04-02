@@ -7,6 +7,9 @@ import cn.wxl475.service.DepartmentService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
 
 @Service
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
@@ -21,6 +24,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     }
 
     @Override
+    @Transactional
     public Department create(Department department) {
         String departmentFunction = department.getDepartmentFunction();
         if(departmentFunction ==null || departmentFunction.isEmpty()) {
@@ -83,9 +87,13 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     }
 
     @Override
-    public Boolean delete(Department department) {
-        departmentMapper.deleteById(department.getDepartmentId());
-        departmentEsRepo.deleteById(department.getDepartmentId());
-        return true;
+    @Transactional
+    public void delete(ArrayList<Long> departmentIds) throws Exception {
+        try {
+            departmentMapper.deleteBatchIds(departmentIds);
+            departmentIds.forEach(departmentEsRepo::deleteById);
+        }catch (Exception e){
+            throw new Exception(e);
+        }
     }
 }
