@@ -73,4 +73,16 @@ public class DepartmentController {
         }
         return Result.success(departmentService.update(departments));
     }
+
+    @PostMapping("/searchByKeyword")
+    public Result searchByKeyword(@RequestParam(required = false) String keyword,
+                         @RequestParam Integer pageNum,
+                         @RequestParam Integer pageSize,
+                         @RequestParam(required = false) String sortField,
+                         @RequestParam(required = false) Integer sortOrder){
+        if(pageNum<=0||pageSize<=0){
+            return Result.error("页码或页大小不合法");
+        }
+        return Result.success(departmentService.searchByKeyword(keyword,pageNum,pageSize,sortField,sortOrder));
+    }
 }

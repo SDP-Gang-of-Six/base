@@ -1,14 +1,23 @@
 package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.DepartmentMapper;
+import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.department.Department;
+import cn.wxl475.pojo.data.Image;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
+import org.springframework.data.elasticsearch.core.SearchHits;
+import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,12 +31,14 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     private final DepartmentMapper departmentMapper;
     private final DepartmentEsRepo departmentEsRepo;
     private final CacheClient cacheClient;
+    private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, CacheClient cacheClient) {
+    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
         this.departmentMapper = departmentMapper;
         this.departmentEsRepo = departmentEsRepo;
         this.cacheClient = cacheClient;
+        this.elasticsearchRestTemplate = elasticsearchRestTemplate;
     }
 
     @Override
@@ -139,5 +150,25 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("department_room_number",departmentRoomNumber);
         return departmentMapper.exists(queryWrapper);
+    }
+
+    @Override
+    public Page<Department> searchByKeyword(String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder) {
+        Page<Department> departments = new Page<>();
+        NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withPageable(PageRequest.of(pageNum-1, pageSize));
+        if(keyword!=null && !keyword.isEmpty()){
+            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"departmentName","departmentType","departmentPrincipal","departmentFunction","departmentRoomNumber"));
+        }
+        if(sortField==null || sortField.isEmpty()){
+            sortField = "departmentId";
+        }
+        if(sortOrder==null || !(sortOrder==1 || sortOrder==-1)){
+            sortOrder=-1;
+        }
+        queryBuilder.withSorts(SortBuilders.fieldSort(sortField).order(sortOrder==-1? SortOrder.DESC:SortOrder.ASC));
+        SearchHits<Department> hits = elasticsearchRestTemplate.search(queryBuilder.build(), Department.class);
+        hits.forEach(department -> departments.getData().add(department.getContent()));
+        departments.setTotalNumber(hits.getTotalHits());
+        return departments;
     }
 }
