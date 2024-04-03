@@ -9,4 +9,6 @@ public interface DepartmentService extends IService<Department> {
     Department create(Department department);
 
     void delete(ArrayList<Long> departmentIds)throws Exception;
+
+    Boolean departmentRoomNumberIsInUse(Integer departmentRoomNumber);
 }

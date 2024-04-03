@@ -5,6 +5,8 @@ import cn.wxl475.pojo.base.department.Department;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
+import com.baomidou.dynamic.datasource.annotation.DS;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -102,5 +104,13 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         }catch (Exception e){
             throw new Exception(e);
         }
+    }
+
+    @Override
+    @DS("slave")
+    public Boolean departmentRoomNumberIsInUse(Integer departmentRoomNumber) {
+        QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("department_room_number",departmentRoomNumber);
+        return departmentMapper.exists(queryWrapper);
     }
 }

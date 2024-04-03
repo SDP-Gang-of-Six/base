@@ -42,6 +42,9 @@ public class DepartmentController {
         if(departmentRoomNumber ==null) {
             errorMsg += "科室房间号不能为空。";
         }
+        if(departmentService.departmentRoomNumberIsInUse(departmentRoomNumber)) {
+            errorMsg += "科室房间号已被使用。";
+        }
         if(!errorMsg.isEmpty()) {
             return Result.error(errorMsg);
         }
@@ -61,5 +64,11 @@ public class DepartmentController {
             return Result.error(e.getMessage());
         }
         return Result.success(true);
+    }
+
+    @PostMapping("/update")
+    public Result update(){
+
+        return Result.success();
     }
 }
