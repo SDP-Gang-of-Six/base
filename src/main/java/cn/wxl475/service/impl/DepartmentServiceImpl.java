@@ -107,6 +107,22 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     }
 
     @Override
+    @Transactional
+    public ArrayList<Department> update(ArrayList<Department> departments) {
+        for (int i=0;i<departments.size();i++) {
+            Department department = departments.get(i);
+            if (!departmentRoomNumberIsInUse(department.getDepartmentRoomNumber())) {
+                departmentMapper.updateById(department);
+                departmentEsRepo.save(department);
+                cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY + department.getDepartmentId());
+            } else {
+                departments.set(i, null);
+            }
+        }
+        return departments;
+    }
+
+    @Override
     @DS("slave")
     public Boolean departmentRoomNumberIsInUse(Integer departmentRoomNumber) {
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>();

@@ -67,8 +67,10 @@ public class DepartmentController {
     }
 
     @PostMapping("/update")
-    public Result update(){
-
-        return Result.success();
+    public Result update(@RequestBody ArrayList<Department> departments){
+        if(departments==null||departments.isEmpty()){
+            return Result.error("无科室需要更新");
+        }
+        return Result.success(departmentService.update(departments));
     }
 }
