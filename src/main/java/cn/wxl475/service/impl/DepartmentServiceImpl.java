@@ -3,14 +3,13 @@ package cn.wxl475.service.impl;
 import cn.wxl475.mapper.DepartmentMapper;
 import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.department.Department;
-import cn.wxl475.pojo.data.Image;
-import cn.wxl475.pojo.data.Video;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import lombok.NonNull;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -44,14 +43,14 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
     @Override
     @Transactional
-    public Department create(Department department) {
+    public Department create(@NonNull Department department) {
         String departmentFunction = department.getDepartmentFunction();
         if(departmentFunction ==null || departmentFunction.isEmpty()) {
             setDefaultDepartmentFunctionByType(department);
         }
+        department.setDeleted(false);
         departmentMapper.insert(department);
         departmentEsRepo.save(department);
-        department.setDeleted(false);
         return department;
     }
 
@@ -69,7 +68,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
     @Override
     @Transactional
-    public ArrayList<Department> update(ArrayList<Department> departments) {
+    public ArrayList<Department> update(@NonNull ArrayList<Department> departments) {
         for (int i=0;i<departments.size();i++) {
             Department department = departments.get(i);
             if(department.getDepartmentRoomNumber()!=null){
@@ -90,7 +89,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         return departments;
     }
 
-    private void setDefaultDepartmentFunctionByType(Department department) {
+    private void setDefaultDepartmentFunctionByType(@NonNull Department department) {
         String departmentType = department.getDepartmentType();
         switch (departmentType) {
             case "前台":
