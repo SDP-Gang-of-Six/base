@@ -4,6 +4,7 @@ import cn.wxl475.mapper.DepartmentMapper;
 import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.department.Department;
 import cn.wxl475.pojo.data.Image;
+import cn.wxl475.pojo.data.Video;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
@@ -154,7 +155,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
     @Override
     public Page<Department> searchByKeyword(String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder) {
-        Page<Department> departments = new Page<>();
+        Page<Department> departments = new Page<>(0L,new ArrayList<>());
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withPageable(PageRequest.of(pageNum-1, pageSize));
         if(keyword!=null && !keyword.isEmpty()){
             queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"departmentName","departmentType","departmentPrincipal","departmentFunction","departmentRoomNumber"));

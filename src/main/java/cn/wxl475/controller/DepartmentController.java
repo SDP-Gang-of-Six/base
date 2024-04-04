@@ -5,6 +5,7 @@ import cn.wxl475.pojo.base.department.Department;
 import cn.wxl475.service.DepartmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -24,6 +25,9 @@ public class DepartmentController {
 
     @PostMapping("/create")
     public Result create(@RequestBody Department department){
+        if(department==null){
+            return Result.error("科室信息异常为空。");
+        }
         String errorMsg="";
         String departmentName = department.getDepartmentName();
         String departmentType = department.getDepartmentType();
@@ -54,7 +58,7 @@ public class DepartmentController {
 
     @PostMapping("/delete")
     public Result delete(@RequestBody ArrayList<Long> departmentIds){
-        if(departmentIds.isEmpty()){
+        if(departmentIds==null||departmentIds.isEmpty()){
             return Result.error("无科室需要删除");
         }
         try {
