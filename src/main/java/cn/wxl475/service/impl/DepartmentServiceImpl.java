@@ -10,6 +10,7 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.NonNull;
+import lombok.extern.slf4j.Slf4j;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -22,9 +23,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
-import static cn.wxl475.redis.RedisConstants.CACHE_DEPARTMENT_DETAIL_KEY;
+import static cn.wxl475.redis.RedisConstants.*;
 
+@Slf4j
 @Service
 public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Department> implements DepartmentService {
 
@@ -71,6 +74,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     public ArrayList<Department> update(@NonNull ArrayList<Department> departments) {
         for (int i=0;i<departments.size();i++) {
             Department department = departments.get(i);
+            Long departmentId = department.getDepartmentId();
             if(department.getDepartmentRoomNumber()!=null){
                 if (departmentRoomNumberIsInUse(department.getDepartmentRoomNumber())) {
                     departments.set(i, null);
@@ -83,8 +87,15 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 }
             }
             departmentMapper.updateById(department);
-            departmentEsRepo.save(department);
-            cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+department.getDepartmentId());
+            departments.set(i,cacheClient.resetKey(
+                    CACHE_DEPARTMENT_DETAIL_KEY,
+                    LOCK_DEPARTMENT_DETAIL_KEY,
+                    departmentId,
+                    Department.class,
+                    id -> departmentMapper.selectById(departmentId),
+                    CACHE_DEPARTMENT_DETAIL_TTL,
+                    TimeUnit.MINUTES));
+            departmentEsRepo.save(departments.get(i));
         }
         return departments;
     }
