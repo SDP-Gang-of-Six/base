@@ -116,9 +116,4 @@ public class StaffServiceImpl extends ServiceImpl<StaffMapper, Staff> implements
         staffs.setTotalNumber(hits.getTotalHits());
         return staffs;
     }
-
-    @Override
-    public ArrayList<Staff> searchByIds(ArrayList<Long> staffIds) {
-        return (ArrayList<Staff>) staffMapper.selectBatchIds(staffIds);
-    }
 }

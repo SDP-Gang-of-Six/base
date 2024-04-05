@@ -92,6 +92,6 @@ public class StaffController {
         if(staffIds==null||staffIds.isEmpty()){
             return Result.success(staffService.list());
         }
-        return Result.success(staffService.searchByIds(staffIds));
+        return Result.success(staffService.listByIds(staffIds));
     }
 }

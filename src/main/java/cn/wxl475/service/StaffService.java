@@ -17,6 +17,4 @@ public interface StaffService extends IService<Staff> {
     boolean staffNameIsInUse(String staffName);
 
     Page<Staff> searchByKeyword(String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder);
-
-    ArrayList<Staff> searchByIds(ArrayList<Long> staffIds);
 }
