@@ -88,4 +88,18 @@ public class DepartmentController {
         }
         return Result.success(departmentService.searchByKeyword(keyword,pageNum,pageSize,sortField,sortOrder));
     }
+
+    @PostMapping("/searchByIdOrRoomNumber")
+    public Result searchByIdOrRoomNumber(@RequestBody(required = false) Long departmentId,@RequestBody(required = false) Integer departmentRoomNumber){
+        if(departmentId!=null&&departmentRoomNumber!=null){
+            return Result.error("只能根据科室ID或房间号查询");
+        }
+        if(departmentId==null&&departmentRoomNumber==null){
+            return Result.error("科室ID和房间号不能同时为空");
+        }
+        if(departmentId!=null){
+            return Result.success(departmentService.searchById(departmentId));
+        }
+        return Result.success(departmentService.searchByRoomNumber(departmentRoomNumber));
+    }
 }

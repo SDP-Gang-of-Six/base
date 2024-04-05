@@ -182,4 +182,71 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         departments.setTotalNumber(hits.getTotalHits());
         return departments;
     }
+
+    @Override
+    public Department searchById(Long departmentId) {
+        Department department = cacheClient.queryWithPassThrough(
+                CACHE_DEPARTMENT_DETAIL_KEY,
+                LOCK_DEPARTMENT_DETAIL_KEY,
+                departmentId,
+                Department.class,
+                departmentMapper::selectById,
+                CACHE_DEPARTMENT_DETAIL_TTL,
+                TimeUnit.MINUTES);
+        if(department!=null){
+            String departmentType = department.getDepartmentType();
+            switch (departmentType){
+                case "档案室":
+                    return department;
+                case "化验室":
+                    return department;
+                case "免疫室":
+                    return department;
+                case "住院部":
+                    return department;
+                case "药房":
+                    return department;
+                case "前台":
+                    return department;
+                default:
+                    return department;
+            }
+        }
+        return department;
+    }
+
+    @Override
+    public Department searchByRoomNumber(Integer departmentRoomNumber) {
+        QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("department_room_number",departmentRoomNumber);
+        Department department = cacheClient.queryWrapperWithPassThrough(
+                CACHE_DEPARTMENT_DETAIL_KEY,
+                LOCK_DEPARTMENT_DETAIL_KEY,
+                departmentRoomNumber,
+                Department.class,
+                queryWrapper,
+                departmentMapper::selectOne,
+                CACHE_DEPARTMENT_DETAIL_TTL,
+                TimeUnit.MINUTES);
+        if(department!=null){
+            String departmentType = department.getDepartmentType();
+            switch (departmentType){
+                case "档案室":
+                    return department;
+                case "化验室":
+                    return department;
+                case "免疫室":
+                    return department;
+                case "住院部":
+                    return department;
+                case "药房":
+                    return department;
+                case "前台":
+                    return department;
+                default:
+                    return department;
+            }
+        }
+        return department;
+    }
 }

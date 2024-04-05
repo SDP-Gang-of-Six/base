@@ -16,4 +16,8 @@ public interface DepartmentService extends IService<Department> {
     Boolean departmentRoomNumberIsInUse(Integer departmentRoomNumber);
 
     Page<Department> searchByKeyword(String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder);
+
+    Department searchById(Long departmentId);
+
+    Department searchByRoomNumber(Integer departmentRoomNumber);
 }
