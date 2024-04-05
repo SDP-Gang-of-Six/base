@@ -92,7 +92,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                     LOCK_DEPARTMENT_DETAIL_KEY,
                     departmentId,
                     Department.class,
-                    id -> departmentMapper.selectById(departmentId),
+                    departmentMapper::selectById,
                     CACHE_DEPARTMENT_DETAIL_TTL,
                     TimeUnit.MINUTES));
             departmentEsRepo.save(departments.get(i));
@@ -184,6 +184,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     }
 
     @Override
+    @DS("slave")
     public Department searchById(Long departmentId) {
         Department department = cacheClient.queryWithPassThrough(
                 CACHE_DEPARTMENT_DETAIL_KEY,
@@ -216,6 +217,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     }
 
     @Override
+    @DS("slave")
     public Department searchByRoomNumber(Integer departmentRoomNumber) {
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("department_room_number",departmentRoomNumber);
