@@ -90,7 +90,7 @@ public class DepartmentController {
     }
 
     @PostMapping("/searchByIdOrRoomNumber")
-    public Result searchByIdOrRoomNumber(@RequestBody(required = false) Long departmentId,@RequestBody(required = false) Integer departmentRoomNumber){
+    public Result searchByIdOrRoomNumber(@RequestParam(required = false) Long departmentId,@RequestParam(required = false) Integer departmentRoomNumber){
         if(departmentId!=null&&departmentRoomNumber!=null){
             return Result.error("只能根据科室ID或房间号查询");
         }
