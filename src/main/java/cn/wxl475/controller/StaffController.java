@@ -49,8 +49,7 @@ public class StaffController {
         if(!errorMsg.isEmpty()){
             return Result.error(errorMsg);
         }
-        staffService.create(staff);
-        return Result.success();
+        return Result.success(staffService.create(staff));
     }
 
     @PostMapping("/delete")
@@ -88,7 +87,7 @@ public class StaffController {
     }
 
     @PostMapping("/searchByIdsOrAll")
-    public Result searchByIdsOrAll(@RequestBody ArrayList<Long> staffIds){
+    public Result searchByIdsOrAll(@RequestBody(required = false) ArrayList<Long> staffIds){
         if(staffIds==null||staffIds.isEmpty()){
             return Result.success(staffService.list());
         }
