@@ -51,7 +51,6 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         if(departmentFunction ==null || departmentFunction.isEmpty()) {
             setDefaultDepartmentFunctionByType(department);
         }
-        department.setDeleted(false);
         departmentMapper.insert(department);
         departmentEsRepo.save(department);
         return department;

@@ -45,7 +45,6 @@ public class StaffServiceImpl extends ServiceImpl<StaffMapper, Staff> implements
     @Override
     @Transactional
     public Staff create(Staff staff) {
-        staff.setDeleted(false);
         staffMapper.insert(staff);
         staffEsRepo.save(staff);
         return staff;
