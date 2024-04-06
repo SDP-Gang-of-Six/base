@@ -1,11 +1,8 @@
 package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.DepartmentMapper;
-import cn.wxl475.mapper.MedicineMapper;
 import cn.wxl475.pojo.Page;
-import cn.wxl475.pojo.base.Medicine;
 import cn.wxl475.pojo.base.department.Department;
-import cn.wxl475.pojo.base.department.SubDepartment;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
@@ -27,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wxl475.redis.RedisConstants.*;
@@ -37,15 +35,15 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
     private final DepartmentMapper departmentMapper;
     private final DepartmentEsRepo departmentEsRepo;
-    private final MedicineMapper medicineMapper;
+    private final MedicineService medicineService;
     private final CacheClient cacheClient;
     private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, MedicineMapper medicineMapper, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
+    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, MedicineService medicineService, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
         this.departmentMapper = departmentMapper;
         this.departmentEsRepo = departmentEsRepo;
-        this.medicineMapper = medicineMapper;
+        this.medicineService = medicineService;
         this.cacheClient = cacheClient;
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
     }
@@ -66,9 +64,11 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     @Transactional
     public void delete(ArrayList<Long> departmentIds) throws Exception {
         try {
+            List<Department> list = list();
             departmentMapper.deleteBatchIds(departmentIds);
             departmentEsRepo.deleteAllById(departmentIds);
             departmentIds.forEach(departmentId-> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departmentId));
+            list.forEach(department -> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+department.getDepartmentRoomNumber()));
         }catch (Exception e){
             throw new Exception(e);
         }
@@ -100,6 +100,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                     departmentMapper::selectById,
                     CACHE_DEPARTMENT_DETAIL_TTL,
                     TimeUnit.MINUTES));
+            cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departments.get(i).getDepartmentRoomNumber());
             departmentEsRepo.save(departments.get(i));
         }
         return departments;
@@ -199,26 +200,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 departmentMapper::selectById,
                 CACHE_DEPARTMENT_DETAIL_TTL,
                 TimeUnit.MINUTES);
-        if(department!=null){
-            String departmentType = department.getDepartmentType();
-            switch (departmentType){
-                case "档案室":
-                    return department;
-                case "化验室":
-                    return department;
-                case "免疫室":
-                    return department;
-                case "住院部":
-                    return department;
-                case "药房":
-                    return new SubDepartment<>(department,medicineMapper.selectList(null));
-                case "前台":
-                    return department;
-                default:
-                    return department;
-            }
-        }
-        return department;
+        return getDepartmentAndDetails(department);
     }
 
     @Override
@@ -235,25 +217,36 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 departmentMapper::selectOne,
                 CACHE_DEPARTMENT_DETAIL_TTL,
                 TimeUnit.MINUTES);
+        return getDepartmentAndDetails(department);
+    }
+
+    private Department getDepartmentAndDetails(Department department) {
         if(department!=null){
             String departmentType = department.getDepartmentType();
             switch (departmentType){
                 case "档案室":
+                    department.setData(null);
                     return department;
                 case "化验室":
+                    department.setData(null);
                     return department;
                 case "免疫室":
+                    department.setData(null);
                     return department;
                 case "住院部":
+                    department.setData(null);
                     return department;
                 case "药房":
-                    return new SubDepartment<>(department,medicineMapper.selectList(null));
+                    department.setData(medicineService.list());
+                    return department;
                 case "前台":
+                    department.setData(null);
                     return department;
                 default:
+                    department.setData(null);
                     return department;
             }
         }
-        return department;
+        return null;
     }
 }
