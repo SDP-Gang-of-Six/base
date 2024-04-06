@@ -2,7 +2,7 @@ package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.DepartmentMapper;
 import cn.wxl475.pojo.Page;
-import cn.wxl475.pojo.base.department.Department;
+import cn.wxl475.pojo.base.Department;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;

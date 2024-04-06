@@ -3,7 +3,6 @@ package cn.wxl475.service.impl;
 import cn.wxl475.mapper.StaffMapper;
 import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.Staff;
-import cn.wxl475.pojo.base.department.Department;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.StaffEsRepo;
 import cn.wxl475.service.StaffService;

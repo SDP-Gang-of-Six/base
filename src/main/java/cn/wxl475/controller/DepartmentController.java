@@ -1,7 +1,7 @@
 package cn.wxl475.controller;
 
 import cn.wxl475.pojo.Result;
-import cn.wxl475.pojo.base.department.Department;
+import cn.wxl475.pojo.base.Department;
 import cn.wxl475.service.DepartmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
