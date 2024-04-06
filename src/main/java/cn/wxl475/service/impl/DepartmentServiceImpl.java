@@ -1,11 +1,15 @@
 package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.DepartmentMapper;
+import cn.wxl475.mapper.MedicineMapper;
 import cn.wxl475.pojo.Page;
+import cn.wxl475.pojo.base.Medicine;
 import cn.wxl475.pojo.base.department.Department;
+import cn.wxl475.pojo.base.department.SubDepartment;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
 import cn.wxl475.service.DepartmentService;
+import cn.wxl475.service.MedicineService;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -33,13 +37,15 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
 
     private final DepartmentMapper departmentMapper;
     private final DepartmentEsRepo departmentEsRepo;
+    private final MedicineMapper medicineMapper;
     private final CacheClient cacheClient;
     private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
+    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, MedicineMapper medicineMapper, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
         this.departmentMapper = departmentMapper;
         this.departmentEsRepo = departmentEsRepo;
+        this.medicineMapper = medicineMapper;
         this.cacheClient = cacheClient;
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
     }
@@ -205,7 +211,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 case "住院部":
                     return department;
                 case "药房":
-                    return department;
+                    return new SubDepartment<>(department,medicineMapper.selectList(null));
                 case "前台":
                     return department;
                 default:
@@ -241,7 +247,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 case "住院部":
                     return department;
                 case "药房":
-                    return department;
+                    return new SubDepartment<>(department,medicineMapper.selectList(null));
                 case "前台":
                     return department;
                 default:
