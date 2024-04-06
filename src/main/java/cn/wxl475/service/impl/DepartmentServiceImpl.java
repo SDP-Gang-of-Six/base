@@ -68,7 +68,6 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             departmentMapper.deleteBatchIds(departmentIds);
             departmentEsRepo.deleteAllById(departmentIds);
             departmentIds.forEach(departmentId-> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departmentId));
-            list.forEach(department -> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+department.getDepartmentRoomNumber()));
         }catch (Exception e){
             throw new Exception(e);
         }
@@ -100,7 +99,6 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                     departmentMapper::selectById,
                     CACHE_DEPARTMENT_DETAIL_TTL,
                     TimeUnit.MINUTES));
-            cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departments.get(i).getDepartmentRoomNumber());
             departmentEsRepo.save(departments.get(i));
         }
         return departments;
@@ -208,16 +206,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     public Department searchByRoomNumber(Integer departmentRoomNumber) {
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("department_room_number",departmentRoomNumber);
-        Department department = cacheClient.queryWrapperWithPassThrough(
-                CACHE_DEPARTMENT_DETAIL_KEY,
-                LOCK_DEPARTMENT_DETAIL_KEY,
-                departmentRoomNumber,
-                Department.class,
-                queryWrapper,
-                departmentMapper::selectOne,
-                CACHE_DEPARTMENT_DETAIL_TTL,
-                TimeUnit.MINUTES);
-        return getDepartmentAndDetails(department);
+        return getDepartmentAndDetails(departmentMapper.selectOne(queryWrapper));
     }
 
     private Department getDepartmentAndDetails(Department department) {
