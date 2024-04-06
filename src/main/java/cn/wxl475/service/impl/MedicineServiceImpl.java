@@ -1,13 +1,10 @@
 package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.MedicineMapper;
-import cn.wxl475.mapper.StaffMapper;
 import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.Medicine;
-import cn.wxl475.pojo.base.Staff;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.MedicineEsRepo;
-import cn.wxl475.repo.StaffEsRepo;
 import cn.wxl475.service.MedicineService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -25,7 +22,6 @@ import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wxl475.redis.RedisConstants.*;
-import static cn.wxl475.redis.RedisConstants.CACHE_STAFF_DETAIL_TTL;
 
 @Service
 public class MedicineServiceImpl extends ServiceImpl<MedicineMapper, Medicine> implements MedicineService {
