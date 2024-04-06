@@ -198,7 +198,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
                 departmentMapper::selectById,
                 CACHE_DEPARTMENT_DETAIL_TTL,
                 TimeUnit.MINUTES);
-        return getDepartmentAndDetails(department);
+        return getDepartmentDetails(department);
     }
 
     @Override
@@ -206,10 +206,10 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     public Department searchByRoomNumber(Integer departmentRoomNumber) {
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("department_room_number",departmentRoomNumber);
-        return getDepartmentAndDetails(departmentMapper.selectOne(queryWrapper));
+        return getDepartmentDetails(departmentMapper.selectOne(queryWrapper));
     }
 
-    private Department getDepartmentAndDetails(Department department) {
+    private Department getDepartmentDetails(Department department) {
         if(department!=null){
             String departmentType = department.getDepartmentType();
             switch (departmentType){
