@@ -5,8 +5,7 @@ import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.Department;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.DepartmentEsRepo;
-import cn.wxl475.service.DepartmentService;
-import cn.wxl475.service.MedicineService;
+import cn.wxl475.service.*;
 import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wxl475.redis.RedisConstants.*;
@@ -36,14 +34,24 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     private final DepartmentMapper departmentMapper;
     private final DepartmentEsRepo departmentEsRepo;
     private final MedicineService medicineService;
+    private final VaccineService vaccineService;
+    private final ChargeService chargeService;
+    private final ItemService itemService;
+    private final RecordService recordService;
+    private final HospitalizationService hospitalizationService;
     private final CacheClient cacheClient;
     private final ElasticsearchRestTemplate elasticsearchRestTemplate;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, MedicineService medicineService, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
+    public DepartmentServiceImpl(DepartmentMapper departmentMapper, DepartmentEsRepo departmentEsRepo, MedicineService medicineService, VaccineService vaccineService, ChargeService chargeService, ItemService itemService, RecordService recordService, HospitalizationService hospitalizationService, CacheClient cacheClient, ElasticsearchRestTemplate elasticsearchRestTemplate) {
         this.departmentMapper = departmentMapper;
         this.departmentEsRepo = departmentEsRepo;
         this.medicineService = medicineService;
+        this.vaccineService = vaccineService;
+        this.chargeService = chargeService;
+        this.itemService = itemService;
+        this.recordService = recordService;
+        this.hospitalizationService = hospitalizationService;
         this.cacheClient = cacheClient;
         this.elasticsearchRestTemplate = elasticsearchRestTemplate;
     }
@@ -64,7 +72,6 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     @Transactional
     public void delete(ArrayList<Long> departmentIds) throws Exception {
         try {
-            List<Department> list = list();
             departmentMapper.deleteBatchIds(departmentIds);
             departmentEsRepo.deleteAllById(departmentIds);
             departmentIds.forEach(departmentId-> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departmentId));
@@ -214,22 +221,22 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
             String departmentType = department.getDepartmentType();
             switch (departmentType){
                 case "档案室":
-                    department.setData(null);
+                    department.setData(recordService.list());
                     return department;
                 case "化验室":
-                    department.setData(null);
+                    department.setData(itemService.list());
                     return department;
                 case "免疫室":
-                    department.setData(null);
+                    department.setData(vaccineService.list());
                     return department;
                 case "住院部":
-                    department.setData(null);
+                    department.setData(hospitalizationService.list());
                     return department;
                 case "药房":
                     department.setData(medicineService.list());
                     return department;
                 case "前台":
-                    department.setData(null);
+                    department.setData(chargeService.list());
                     return department;
                 default:
                     department.setData(null);
