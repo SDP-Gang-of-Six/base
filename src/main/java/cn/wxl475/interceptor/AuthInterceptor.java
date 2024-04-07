@@ -26,7 +26,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
         String uri = request.getRequestURI();
-        if(uri.contains("search")){
+        if(uri.contains("search")||uri.contains("select")){
             return true;
         }else if(!(Boolean) claims.get("userType")){
             response.getWriter().write(JSONUtil.toJsonStr(Result.error("权限不足")));
