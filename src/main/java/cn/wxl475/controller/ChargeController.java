@@ -6,7 +6,6 @@ import cn.wxl475.repo.ChargeEsRepo;
 import cn.wxl475.service.ChargeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -74,8 +73,8 @@ public class ChargeController {
         return Result.success();
     }
 
-    @PostMapping("/updateCharges")
-    public Result updateCharges(@RequestHeader("Authorization") String token, @RequestBody Charge charge) {
+    @PostMapping("/updateCharge")
+    public Result updateCharge(@RequestHeader("Authorization") String token, @RequestBody Charge charge) {
         if(charge == null) {
             return Result.error("没有收费条目需要修改");
         }
