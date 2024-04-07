@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static cn.wxl475.redis.RedisConstants.*;
@@ -73,7 +72,6 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
     @Transactional
     public void delete(ArrayList<Long> departmentIds) throws Exception {
         try {
-            List<Department> list = list();
             departmentMapper.deleteBatchIds(departmentIds);
             departmentEsRepo.deleteAllById(departmentIds);
             departmentIds.forEach(departmentId-> cacheClient.delete(CACHE_DEPARTMENT_DETAIL_KEY+departmentId));
