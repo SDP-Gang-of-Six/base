@@ -17,6 +17,8 @@ import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.stereotype.Service;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -54,17 +56,21 @@ public class HospitalizationServiceImpl extends ServiceImpl<HospitalizationMappe
     public Page<Hospitalization> select(String allField, String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder) {
         Page<Hospitalization> page = new Page<>(0L,new ArrayList<>());
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withPageable(PageRequest.of(pageNum-1, pageSize));
+        BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
         if(allField!=null && !allField.isEmpty()){
-            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(allField, "patientSpecies", "hospitalizationReason","hospitalizationDepartment","hospitalizationDoctor","hospitalizationPosition","startTime","endTime"));
+            boolQueryBuilder.must(QueryBuilders.multiMatchQuery(allField, "patientSpecies", "hospitalizationReason","hospitalizationDepartment","hospitalizationDoctor","hospitalizationPosition","startTime","endTime"));
         }
         if(keyword!=null && !keyword.isEmpty()){
-            queryBuilder.withQuery(QueryBuilders.termQuery("patientName", keyword));
+            boolQueryBuilder.filter(QueryBuilders.termQuery("patientName", keyword));
         }
         if(sortField==null || sortField.isEmpty()){
             sortField = "hospitalizationId";
         }
         if(sortOrder==null || !(sortOrder==1 || sortOrder==-1)){
             sortOrder=-1;
+        }
+        if (boolQueryBuilder.hasClauses()) {
+            queryBuilder.withQuery(boolQueryBuilder);
         }
         queryBuilder.withSorts(SortBuilders.fieldSort(sortField).order(sortOrder==-1? SortOrder.DESC:SortOrder.ASC));
         SearchHits<Hospitalization> hits = elasticsearchRestTemplate.search(queryBuilder.build(), Hospitalization.class);
