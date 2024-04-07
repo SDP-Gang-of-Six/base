@@ -8,6 +8,7 @@ import cn.wxl475.redis.CacheClient;
 
 import cn.wxl475.repo.VaccineEsRepo;
 import cn.wxl475.service.VaccineService;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -88,6 +89,7 @@ public class VaccineServiceImpl extends ServiceImpl<VaccineMapper, Vaccine> impl
     }
 
     @Override
+    @DS("slave")
     public Vaccine selectById(Long vaccineId) {
         return cacheClient.queryWithPassThrough(
                 CACHE_VACCINE_KEY,

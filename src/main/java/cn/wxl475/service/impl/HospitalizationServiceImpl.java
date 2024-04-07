@@ -6,6 +6,7 @@ import cn.wxl475.pojo.base.hospitalization.Hospitalization;
 import cn.wxl475.redis.CacheClient;
 import cn.wxl475.repo.HospitalizationEsRepo;
 import cn.wxl475.service.HospitalizationService;
+import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.sort.SortBuilders;
@@ -89,6 +90,7 @@ public class HospitalizationServiceImpl extends ServiceImpl<HospitalizationMappe
     }
 
     @Override
+    @DS("slave")
     public Hospitalization selectById(Long hospitalizationId) {
         return cacheClient.queryWithPassThrough(
                 CACHE_HOSPITALIZATION_KEY,
