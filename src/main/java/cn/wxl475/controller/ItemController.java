@@ -8,4 +8,5 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/base/item")
 public class ItemController {
+
 }
