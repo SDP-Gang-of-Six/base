@@ -71,8 +71,9 @@ public class ItemController {
             return Result.error("没有化验项目需要修改");
         }
         itemService.updateById(item);
-        itemEsRepo.delete(item);
         Long id = item.getItemId();
+        Item newItem = itemService.selectById(id);
+        itemEsRepo.save(newItem);
         stringRedisTemplate.delete(CACHE_ITEMS_KEY + id);
         return Result.success();
     }
@@ -91,7 +92,7 @@ public class ItemController {
     }
 
     @GetMapping("/getItemById/{itemId}")
-    public Result getItemById(@RequestHeader("Authorization") String token, Long itemId) {
+    public Result getItemById(@RequestHeader("Authorization") String token, @PathVariable Long itemId) {
         return Result.success(itemService.selectById(itemId));
     }
 }

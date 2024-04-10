@@ -71,8 +71,9 @@ public class RecordController {
             return Result.error("没有档案需要修改");
         }
         recordService.updateById(record);
-        recordEsRepo.delete(record);
         Long id = record.getRecordId();
+        Record newRecord = recordService.selectById(id);
+        recordEsRepo.save(newRecord);
         stringRedisTemplate.delete(CACHE_RECORDS_KEY + id);
         return Result.success();
     }
@@ -91,7 +92,7 @@ public class RecordController {
     }
 
     @GetMapping("/getRecordById/{recordId}")
-    public Result getRecordById(@RequestHeader("Authorization") String token, Long recordId) {
+    public Result getRecordById(@RequestHeader("Authorization") String token, @PathVariable Long recordId) {
         return Result.success(recordService.selectById(recordId));
     }
 }

@@ -31,25 +31,30 @@ public class ChargeController {
     @PostMapping("/addCharge")
     public Result addCharge(@RequestHeader("Authorization") String token, @RequestBody Charge charge) {
         String payer = charge.getPayer();
-        String illnessName = charge.getIllnessName();
-        String illnessType = charge.getIllnessType();
         String petType = charge.getPetType();
-        Integer money = charge.getMoney();
+        Integer registerFee = charge.getRegisterFee();
+        Integer itemFee = charge.getItemFee();
+        Integer operationFee = charge.getOperationFee();
+        String detail = charge.getDetail();
         if(payer == null || payer.isEmpty()) {
             return Result.error("缴费人不能为空");
-        }
-        if(illnessType == null || illnessType.isEmpty()) {
-            return Result.error("病例类型不能为空");
-        }
-        if(illnessName == null || illnessName.isEmpty()) {
-            return Result.error("病例名称不能为空");
         }
         if(petType == null || petType.isEmpty()) {
             return Result.error("宠物种类不能为空");
         }
-        if(money == null) {
-            return Result.error("缴费金额不能为空");
+        if(registerFee == null) {
+            return Result.error("检查费用不能为空");
         }
+        if(itemFee == null) {
+            return Result.error("化验费用不能为空");
+        }
+        if(operationFee == null) {
+            return Result.error("手术费用不能为空");
+        }
+        if(detail == null || detail.isEmpty()) {
+            return Result.error("详细信息不能为空");
+        }
+        charge.setSum(registerFee + itemFee + operationFee);
         chargeService.save(charge);
         chargeEsRepo.save(charge);
         return Result.success();
@@ -58,7 +63,7 @@ public class ChargeController {
     @PostMapping("/deleteCharges")
     public Result deleteCharges(@RequestHeader("Authorization") String token, @RequestBody List<Long> ids) {
         if(ids == null|| ids.isEmpty()){
-            return Result.error("无科室需要删除");
+            return Result.error("无收费条目需要删除");
         }
         try {
             chargeService.removeBatchByIds(ids);
@@ -78,16 +83,20 @@ public class ChargeController {
         if(charge == null) {
             return Result.error("没有收费条目需要修改");
         }
+        charge.setSum(charge.getRegisterFee() + charge.getItemFee() + charge.getOperationFee());
         chargeService.updateById(charge);
-        chargeEsRepo.delete(charge);
         Long id = charge.getChargeId();
+        Charge newCharge = chargeService.selectById(id);
+        chargeEsRepo.save(newCharge);
         stringRedisTemplate.delete(CACHE_CHARGES_KEY + id);
         return Result.success();
     }
 
     @PostMapping("/searchChargesByKeyword")
-    public Result searchIllnessByKeyword(@RequestHeader("Authorization") String token,
+    public Result searchChargesByKeyword(@RequestHeader("Authorization") String token,
                                          @RequestParam(required = false) String keyword,
+                                         @RequestParam(required = false) Integer minFee,
+                                         @RequestParam(required = false) Integer maxFee,
                                          @RequestParam Integer pageNum,
                                          @RequestParam Integer pageSize,
                                          @RequestParam(required = false) String sortField,
@@ -95,12 +104,13 @@ public class ChargeController {
         if(pageNum <= 0 || pageSize <= 0){
             return Result.error("页码或页大小不合法");
         }
-        return Result.success(chargeService.searchChargesWithKeyword(keyword,pageNum,pageSize,sortField,sortOrder));
+        return Result.success(chargeService.searchChargesWithKeyword(keyword,minFee,maxFee,pageNum,pageSize,sortField,sortOrder));
     }
 
     @GetMapping("/getChargeById/{chargeId}")
-    public Result getChargeById(@RequestHeader("Authorization") String token, Long chargeId) {
-        return Result.success(chargeService.selectById(chargeId));
+    public Result getChargeById(@RequestHeader("Authorization") String token, @PathVariable Long chargeId) {
+        Charge charge = chargeService.selectById(chargeId);
+        return Result.success(charge);
     }
 
 }

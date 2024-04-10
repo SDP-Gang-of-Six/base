@@ -1,7 +1,6 @@
 package cn.wxl475.service.impl;
 
 import cn.wxl475.mapper.ChargeMapper;
-import cn.wxl475.pojo.Illness;
 import cn.wxl475.pojo.Page;
 import cn.wxl475.pojo.base.Charge.Charge;
 import cn.wxl475.redis.CacheClient;
@@ -40,11 +39,20 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeMapper, Charge> impleme
     private CacheClient cacheClient;
     @Override
     @DS("slave")
-    public Page<Charge> searchChargesWithKeyword(String keyword, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder) {
+    public Page<Charge> searchChargesWithKeyword(String keyword, Integer minFee, Integer maxFee, Integer pageNum, Integer pageSize, String sortField, Integer sortOrder) {
         Page<Charge> charges = new Page<>(0L, new ArrayList<>());
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withPageable(PageRequest.of(pageNum - 1, pageSize));
         if(keyword != null && !keyword.isEmpty()){
-            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"illnessName", "illnessType", "payer", "petType"));
+            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"detail", "payer", "petType"));
+        }
+        if(minFee != null && maxFee != null) {
+            queryBuilder.withQuery(QueryBuilders.rangeQuery("sum").from(minFee).to(maxFee));
+        }
+        else if(minFee != null) {
+            queryBuilder.withQuery(QueryBuilders.rangeQuery("sum").gte(minFee));
+        }
+        else if(maxFee != null) {
+            queryBuilder.withQuery(QueryBuilders.rangeQuery("sum").lte(maxFee));
         }
         if(sortField == null || sortField.isEmpty()){
             sortField = "chargeId";
@@ -67,7 +75,7 @@ public class ChargeServiceImpl extends ServiceImpl<ChargeMapper, Charge> impleme
                 LOCK_CHARGES_KEY,
                 chargeId,
                 Charge.class,
-                id ->  chargeMapper.selectById(chargeId),
+                id -> chargeMapper.selectById(chargeId),
                 CACHE_CHARGES_TTL,
                 TimeUnit.MINUTES
         );
