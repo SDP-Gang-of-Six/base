@@ -2,6 +2,7 @@ package cn.wxl475;
 
 import cn.wxl475.pojo.base.Department;
 import cn.wxl475.repo.DepartmentEsRepo;
+import cn.wxl475.service.DepartmentService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.elasticsearch.core.ElasticsearchRestTemplate;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 @Slf4j
 @SpringBootTest(args = "--spring.profiles.active=dev")
@@ -20,6 +23,9 @@ public class DepartmentsEsTest {
 
     @Autowired
     private DepartmentEsRepo departmentEsRepo;
+
+    @Autowired
+    private DepartmentService departmentService;
 
     @Test
     public void creatDepartmentsIndex(){
@@ -48,6 +54,8 @@ public class DepartmentsEsTest {
         Class<Department> aClass = Department.class;
         boolean deleted = elasticsearchRestTemplate.indexOps(aClass).delete();
         boolean created = elasticsearchRestTemplate.indexOps(aClass).createWithMapping();
+        List<Department> list = departmentService.list();
+        departmentEsRepo.saveAll(list);
         if(deleted&&created){
             log.info("重建索引：{}",aClass.getName()+",成功");
         }else {
