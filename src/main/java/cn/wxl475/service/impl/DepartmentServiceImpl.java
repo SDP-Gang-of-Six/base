@@ -179,7 +179,7 @@ public class DepartmentServiceImpl extends ServiceImpl<DepartmentMapper, Departm
         Page<Department> departments = new Page<>(0L,new ArrayList<>());
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withPageable(PageRequest.of(pageNum-1, pageSize));
         if(keyword!=null && !keyword.isEmpty()){
-            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"departmentName","departmentType","departmentPrincipal","departmentFunction","departmentRoomNumber"));
+            queryBuilder.withQuery(QueryBuilders.multiMatchQuery(keyword,"departmentName","departmentType","departmentPrincipal","departmentFunction"));
         }
         if(sortField==null || sortField.isEmpty()){
             sortField = "departmentId";
