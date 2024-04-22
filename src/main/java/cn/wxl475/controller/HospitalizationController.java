@@ -31,7 +31,7 @@ public class HospitalizationController {
         return Result.success(hospitalizationService.update(hospitalization));
     }
 
-    @PostMapping("select")
+    @GetMapping("select")
     public Result select(@RequestBody(required = false) String allField,
                          @RequestParam(required = false) String keyword,
                          @RequestParam Integer pageNum,

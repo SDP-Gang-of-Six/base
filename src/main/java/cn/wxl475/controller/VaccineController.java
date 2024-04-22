@@ -31,7 +31,7 @@ public class VaccineController {
         return Result.success(vaccineService.update(vaccine));
     }
 
-    @PostMapping("select")
+    @GetMapping("select")
     public Result select(@RequestParam(required = false) String keyword,
                          @RequestParam Integer pageNum,
                          @RequestParam Integer pageSize,
